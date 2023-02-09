@@ -10,11 +10,14 @@ void FrameBuffer::Init(int w, int h)
     height    = h;
     int size  = 3 * width * height;
     imageData = new unsigned char[size];
+
+    //TOFDO ALLOCATE
 }
 
 void FrameBuffer::Free()
 {
     delete[] imageData;
+    //TODO
 }
 
 void FrameBuffer::Clear(unsigned char r, unsigned char g, unsigned char b)

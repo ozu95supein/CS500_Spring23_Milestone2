@@ -58,12 +58,15 @@ void ParseSceneFromFile(string filepath, SceneStruct& scene)
 	CameraObject inputCamera;
 	glm::vec3 inputSphereCenter;
 	glm::vec3 inputBoxCorner;
+	glm::vec3 inputBoxLength;
+	glm::vec3 inputBoxWidth;
 	Material inputMaterial;
 	float inputFloat;
 	float inputRadiusFloat;
 	//these will be the vectors filled with the raycasting objects
 	vector<SphereObject> inputSpheres;
-
+	vector<BoxObject> inputBoxes;
+	vector<LightObject> inputLights;
 	glm::vec3 inputAmbient;
 	glm::vec3 inputDiffuse;
 	//we will use booleans to keep track of what object we are creating
