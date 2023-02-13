@@ -64,7 +64,7 @@ int main(int argc, char ** argv)
     //Recompute Up
     U = glm::cross(R, View);
     U = glm::normalize(U);
-
+    
     //boolean to render the image, this will only do this once per button press
     //this is to make sure we are not always doing the passes
     bool Need_To_RenderFullImage = true;
@@ -102,8 +102,6 @@ int main(int argc, char ** argv)
         glm::vec3 result_color;
         if (Need_To_RenderFullImage)
         {
-
-
             for (unsigned x = 0; x < WIDTH; x++)
             {
                 NDC_x = ((x + 0.5f) - w_o_2) / w_o_2;

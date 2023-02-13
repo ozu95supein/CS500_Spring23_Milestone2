@@ -5,6 +5,9 @@
 struct SceneStruct
 {
 	std::vector<SphereObject> mSphereObjs;
+    std::vector<BoxObject> mSceneBoxes;
+    std::vector<SphereObject> mSceneLights;
+
 	CameraObject mSceneCamera;
 	glm::vec3 SceneAmbient;
 };
@@ -18,7 +21,7 @@ glm::vec3 ThrowRay(Ray& r, SceneStruct& scene, bool use_default_amb)
 	std::vector<SphereObject>::iterator nearest_sphere_obj_it;
 	RAY_HIT_TYPE e_hit_type = RAY_HIT_TYPE::E_NO_HIT;
 	Material mat = Material::E_DIFFUSE;
-       // integer to track nearest object
+    // integer to track nearest object
     // (-1 == default option, not set)
     // (0 == NO INTERSECT) AKA all t values are -1
     // (1 == Sphere)
