@@ -35,5 +35,9 @@ struct Ray
 		P = origin;
 		v = dir;
 	}
+	glm::vec3 FindPointAt_t(float t)
+	{
+		return (P + (t*v));
+	}
 };
 

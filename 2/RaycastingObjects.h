@@ -119,6 +119,7 @@ float Ray_VS_Sphere_WithIntersectionNormal(Ray& r, Sphere s, glm::vec3 & normal)
 	float discriminant = b * b - (4.0f * a * c);
 	if (discriminant < 0)
 	{
+		normal = glm::vec3(0.0f, 0.0f, 0.0f);
 		//return a negative number for no intersection
 		return -1.0f;
 	}
@@ -131,11 +132,21 @@ float Ray_VS_Sphere_WithIntersectionNormal(Ray& r, Sphere s, glm::vec3 & normal)
 		{
 			current_t = ((-2.0f * (glm::dot(r.v, CP))) + glm::sqrt(discriminant)) / (2 * (glm::dot(r.v, r.v)));
 		}
+		//make a normal from the intersection point and sphere center
+		glm::vec3 intersect = r.FindPointAt_t(current_t);
+		glm::vec3 surface_normal = intersect - s.GetCenter();
+		surface_normal = glm::normalize(surface_normal);
+		normal = surface_normal;
 		return current_t;
 	}
 	else if (discriminant == 0)
 	{
 		current_t = -(glm::dot(r.v, CP)) / (glm::dot(r.v, r.v));
+		//make a normal from the intersection point and sphere center
+		glm::vec3 intersect = r.FindPointAt_t(current_t);
+		glm::vec3 surface_normal = intersect - s.GetCenter();
+		surface_normal = glm::normalize(surface_normal);
+		normal = surface_normal;
 		return current_t;
 	}
 	return -1.0f;
