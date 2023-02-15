@@ -223,6 +223,7 @@ glm::vec3 ThrowRayRecursiveBounce(Ray& r, SceneStruct& scene, bool use_default_a
                     //generate a new random ray, nr, with the point of intersection, the normal, and call this function again recursively like this:
                     //get point of intersection, NOTE WE NEED TO OFFSET THIS
                     glm::vec3 pi = r.FindPointAt_t(smallest_t);
+                    
                     //calculate the normal of the sphere
                     //  get center of sphere and pi, make a vector and normalize
 
@@ -239,7 +240,7 @@ glm::vec3 ThrowRayRecursiveBounce(Ray& r, SceneStruct& scene, bool use_default_a
 
                     int b = maxBounces - 1;
                     
-                    return nearest_sphere_obj_it->color * ThrowRayRecursiveBounce(r, scene, use_default_amb, b);
+                    return nearest_sphere_obj_it->color * ThrowRayRecursiveBounce(nr, scene, use_default_amb, b);
                 }
                 else if (e_material_type == Material::E_METALLIC)
                 {
@@ -251,20 +252,18 @@ glm::vec3 ThrowRayRecursiveBounce(Ray& r, SceneStruct& scene, bool use_default_a
             {
                 if (e_material_type == Material::E_DIFFUSE)
                 {
-                    // //generate a new random ray, nr, with the point of intersection, the normal, and call this function again recursively like this:
-                    // //get point of intersection, NOTE WE NEED TO OFFSET THIS
-                    // glm::vec3 pi = r.RayOrigin_p + (r.direction_v * smallest_t);
-                    // glm::vec3 box_normal =  nearest_box_obj_it->GetNormalOfIntersection(pi, MY_EPSILON);
-                    // //make offseted point
-                    // glm::vec3 p_offset = pi + MY_EPSILON * box_normal;
-                    // glm::vec3 dir = myRand_vec3();
-                    // Ray nr(p_offset, dir);
-                    // int b = RemainingBounces - 1;
+                    //generate a new random ray, nr, with the point of intersection, the normal, and call this function again recursively like this:
+                    //get point of intersection, NOTE WE NEED TO OFFSET THIS
+                    glm::vec3 pi = r.FindPointAt_t(smallest_t);
+                    glm::vec3 box_normal =  nearest_box_obj_it->GetNormalOfIntersection(pi, MY_EPSILON);
+                    //make offseted point
+                    glm::vec3 p_offset = pi + MY_EPSILON * box_normal;
+                    glm::vec3 dir = myRand_vec3();
+                    Ray nr(p_offset, dir);
+                    int b = maxBounces - 1;
                     // return nearest_box_obj_it->GetMaterialDiffuse() * CastRayRecursiveBounce(scene, nr, b, use_default_amb);
                     //return nearest_box_obj_it->GetMaterialDiffuse();
-
-                    int b = maxBounces - 1;
-                    return nearest_box_obj_it->GetMaterialDiffuse() * ThrowRayRecursiveBounce(r, scene, use_default_amb, b);
+                    return nearest_box_obj_it->GetMaterialDiffuse() * ThrowRayRecursiveBounce(nr, scene, use_default_amb, b);
                 }
                 else if (e_material_type == Material::E_METALLIC)
                 {

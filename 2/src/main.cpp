@@ -10,10 +10,10 @@ int main(int argc, char ** argv)
     unsigned int WIDTH = 500;
     unsigned int HEIGHT = 500;
 
-    std::string inputFile = "A1.txt";
+    std::string inputFile = "A2.txt";
     std::string screenshotName = "screenshot.png";
     bool        takeScreenshot = false;
-    unsigned int maxBounces = 1;
+    unsigned int maxBounces = 5;
     unsigned int samplesPerPixel = 1;
 
     //receive commandline arguments 
@@ -40,7 +40,7 @@ int main(int argc, char ** argv)
     {
         samplesPerPixel = atoi(argv[6]);
     }
-    sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "cs500_oscar.s_1");
+    sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "cs500_oscar.s_2");
     FrameBuffer::Init(WIDTH, HEIGHT);
 
     //parse
@@ -114,9 +114,12 @@ int main(int argc, char ** argv)
                     RayDir = glm::normalize(RayDir);
                     ray.v = RayDir;   //update the ray direction according to PixelWorld Coords
 
-                    //glm::vec3 CastRayRecursiveBounce(SceneStruct scene, Ray r, int RemainingBounces)
-                    // Throw a Ray to the scene and get the resulting color if it reaches a light, or ambiend
-                    result_color = ThrowRay(ray, currentScene, false);
+                    //original from milestone 1
+                    //result_color = ThrowRay(ray, currentScene, false);
+
+                    // Milestone 2: Throw a Ray to the scene and get the resulting color if it reaches a light, or ambient
+                    result_color = ThrowRayRecursiveBounce(ray, currentScene, false, maxBounces);
+
                     //convert to 255 format and set the pixel in the frame buffer
                     glm::vec3 result_color_255(result_color.x * 255.0f, result_color.y * 255.0f, result_color.z * 255.0f);
                     FrameBuffer::SetPixel(x, y, result_color_255.x, result_color_255.y, result_color_255.z);
