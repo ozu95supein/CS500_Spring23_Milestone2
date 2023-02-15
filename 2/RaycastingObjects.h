@@ -2,6 +2,9 @@
 #include "Primitives.h"
 #include "Materials.h"
 
+const float PI = 3.141592f;
+const float MY_EPSILON = 0.001f;
+
 struct SphereObject
 {
 	Sphere s;
@@ -207,7 +210,7 @@ struct BoxObject
 	}
 	~BoxObject()
 	{
-
+		BoxPlanes.clear();
 	}
 	glm::vec3 GetCorner()
 	{
