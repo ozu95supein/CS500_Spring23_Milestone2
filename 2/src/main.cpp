@@ -118,7 +118,7 @@ int main(int argc, char ** argv)
                     //result_color = ThrowRay(ray, currentScene, false);
 
                     // Milestone 2: Throw a Ray to the scene and get the resulting color if it reaches a light, or ambient
-                    result_color = ThrowRayRecursiveBounce(ray, currentScene, false, maxBounces);
+                    result_color = ThrowRayRecursiveBounce(ray, currentScene, true, maxBounces);
 
                     //convert to 255 format and set the pixel in the frame buffer
                     glm::vec3 result_color_255(result_color.x * 255.0f, result_color.y * 255.0f, result_color.z * 255.0f);

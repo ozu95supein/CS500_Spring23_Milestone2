@@ -234,7 +234,9 @@ void ParseSceneFromFile(string filepath, SceneStruct& scene)
 	SceneStruct inputScene;
 	inputScene.mSceneCamera = inputCamera;
 	inputScene.mSphereObjs = inputSpheres;
+	inputScene.mSceneLights = inputLights;
 	inputScene.SceneAmbient = inputAmbient;
+	inputScene.SceneAmbient_255 = glm::vec3(inputAmbient.x * 255, inputAmbient.y * 255, inputAmbient.z * 255);
 	scene = inputScene;
 	return;
 }

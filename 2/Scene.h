@@ -32,6 +32,7 @@ struct SceneStruct
 
 	CameraObject mSceneCamera;
 	glm::vec3 SceneAmbient;
+	glm::vec3 SceneAmbient_255;
 };
 // NOTE: if the scene has an ambient color, we dont need to use the default ambient
 glm::vec3 ThrowRay(Ray& r, SceneStruct& scene, bool use_default_amb)
@@ -177,7 +178,7 @@ glm::vec3 ThrowRayRecursiveBounce(Ray& r, SceneStruct& scene, bool use_default_a
         {
             return glm::vec3(0.2, 0.2, 0.2);
         }
-        return scene.SceneAmbient;
+        return scene.SceneAmbient_255;
     }
     //set the material type for the object depending on what hit
     if (e_hit_type == RAY_HIT_TYPE::E_SPHERE_HIT)
@@ -195,16 +196,18 @@ glm::vec3 ThrowRayRecursiveBounce(Ray& r, SceneStruct& scene, bool use_default_a
         //  if intersecting object is a light we return lightcolor matdiffuse
         if (e_hit_type == RAY_HIT_TYPE::E_LIGHT_HIT)
         {
-            return nearest_light_obj_it->color;
+            glm::vec3 lightcolor_255((nearest_light_obj_it->color.x * 255), (nearest_light_obj_it->color.y * 255), (nearest_light_obj_it->color.z * 255));
+            return lightcolor_255;
         }
         //  else if intersecting object is not a light we return ambient
         else
         {
             if (use_default_amb)
             {
-                return glm::vec3(0.2, 0.2, 0.2);
+                return glm::vec3(0.2 * 255, 0.2 * 255, 0.2 * 255);
             }
-            return scene.SceneAmbient;
+
+            return scene.SceneAmbient_255;
         }
     }
     else //if we still have bounces
@@ -212,7 +215,8 @@ glm::vec3 ThrowRayRecursiveBounce(Ray& r, SceneStruct& scene, bool use_default_a
         //  if closest object is a light
         if (e_hit_type == RAY_HIT_TYPE::E_LIGHT_HIT)
         {
-            return nearest_light_obj_it->color;
+            glm::vec3 lightcolor_255((nearest_light_obj_it->color.x * 255), (nearest_light_obj_it->color.y * 255), (nearest_light_obj_it->color.z * 255));
+            return lightcolor_255;
         }
         else
         {
@@ -228,7 +232,6 @@ glm::vec3 ThrowRayRecursiveBounce(Ray& r, SceneStruct& scene, bool use_default_a
                     //  get center of sphere and pi, make a vector and normalize
 
                     glm::vec3 sphere_normal = pi - nearest_sphere_obj_it->s.GetCenter();
-                    glm::vec3 dirtolight = glm::vec3(0.0, 2.0, 0.0) - pi;
 
                     sphere_normal = glm::normalize(sphere_normal);
                     //make offseted point
@@ -239,12 +242,16 @@ glm::vec3 ThrowRayRecursiveBounce(Ray& r, SceneStruct& scene, bool use_default_a
                     Ray nr(p_offset, dir);
 
                     int b = maxBounces - 1;
-                    
-                    return nearest_sphere_obj_it->color * ThrowRayRecursiveBounce(nr, scene, use_default_amb, b);
+                    glm::vec3 spherecolor_255 = glm::vec3(nearest_sphere_obj_it->color.x * 255, nearest_sphere_obj_it->color.y * 255, nearest_sphere_obj_it->color.z * 255);
+                    return spherecolor_255 * ThrowRayRecursiveBounce(nr, scene, use_default_amb, b);
                 }
                 else if (e_material_type == Material::E_METALLIC)
                 {
-                    
+                    if (use_default_amb)
+                    {
+                        return glm::vec3(0.2 * 255, 0.2 * 255, 0.2 * 255);
+                    }
+                    return scene.SceneAmbient_255;
                 }
 
             }
@@ -263,17 +270,17 @@ glm::vec3 ThrowRayRecursiveBounce(Ray& r, SceneStruct& scene, bool use_default_a
                     int b = maxBounces - 1;
                     // return nearest_box_obj_it->GetMaterialDiffuse() * CastRayRecursiveBounce(scene, nr, b, use_default_amb);
                     //return nearest_box_obj_it->GetMaterialDiffuse();
-                    return nearest_box_obj_it->GetMaterialDiffuse() * ThrowRayRecursiveBounce(nr, scene, use_default_amb, b);
+                    glm::vec3 boxcolor_255 = glm::vec3((nearest_box_obj_it->GetMaterialDiffuse()).x * 255, (nearest_box_obj_it->GetMaterialDiffuse()).y * 255, (nearest_box_obj_it->GetMaterialDiffuse()).z * 255);
+                    return boxcolor_255 * ThrowRayRecursiveBounce(nr, scene, use_default_amb, b);
                 }
                 else if (e_material_type == Material::E_METALLIC)
                 {
                     if (use_default_amb)
                     {
-                        return glm::vec3(0.2, 0.2, 0.2);
+                        return glm::vec3(0.2 * 255, 0.2 * 255, 0.2 * 255);
                     }
-                    return scene.SceneAmbient;
+                    return scene.SceneAmbient_255;
                 }
-
             }
         }
 
