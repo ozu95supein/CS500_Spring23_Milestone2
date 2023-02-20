@@ -3,14 +3,14 @@
 #include "RaycastingObjects.h"
 float myRand_0_to_1()
 {
-    float r = rand() / RAND_MAX;
+    float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
     return r;
 }
 float myRand_neg1_to1()
 {
     float r = myRand_0_to_1();
     r = 2.0f * r;
-    r -= -1.0f;
+    r += -1.0f;
     return r;
 }
 glm::vec3 myRand_vec3()
@@ -178,7 +178,7 @@ glm::vec3 ThrowRayRecursiveBounce(Ray& r, SceneStruct& scene, bool use_default_a
         {
             return glm::vec3(0.2, 0.2, 0.2);
         }
-        return scene.SceneAmbient_255;
+        return scene.SceneAmbient;
     }
     //set the material type for the object depending on what hit
     if (e_hit_type == RAY_HIT_TYPE::E_SPHERE_HIT)
@@ -196,18 +196,17 @@ glm::vec3 ThrowRayRecursiveBounce(Ray& r, SceneStruct& scene, bool use_default_a
         //  if intersecting object is a light we return lightcolor matdiffuse
         if (e_hit_type == RAY_HIT_TYPE::E_LIGHT_HIT)
         {
-            glm::vec3 lightcolor_255((nearest_light_obj_it->color.x * 255), (nearest_light_obj_it->color.y * 255), (nearest_light_obj_it->color.z * 255));
-            return lightcolor_255;
+            return nearest_light_obj_it->color;
         }
         //  else if intersecting object is not a light we return ambient
         else
         {
             if (use_default_amb)
             {
-                return glm::vec3(0.2 * 255, 0.2 * 255, 0.2 * 255);
+                return glm::vec3(0.2, 0.2, 0.2);
             }
 
-            return scene.SceneAmbient_255;
+            return scene.SceneAmbient;
         }
     }
     else //if we still have bounces
@@ -215,8 +214,7 @@ glm::vec3 ThrowRayRecursiveBounce(Ray& r, SceneStruct& scene, bool use_default_a
         //  if closest object is a light
         if (e_hit_type == RAY_HIT_TYPE::E_LIGHT_HIT)
         {
-            glm::vec3 lightcolor_255((nearest_light_obj_it->color.x * 255), (nearest_light_obj_it->color.y * 255), (nearest_light_obj_it->color.z * 255));
-            return lightcolor_255;
+            return nearest_light_obj_it->color;
         }
         else
         {
@@ -230,30 +228,29 @@ glm::vec3 ThrowRayRecursiveBounce(Ray& r, SceneStruct& scene, bool use_default_a
                     
                     //calculate the normal of the sphere
                     //  get center of sphere and pi, make a vector and normalize
-
                     glm::vec3 sphere_normal = pi - nearest_sphere_obj_it->s.GetCenter();
-
                     sphere_normal = glm::normalize(sphere_normal);
+
                     //make offseted point
                     glm::vec3 p_offset = pi + MY_EPSILON * sphere_normal;
                     glm::vec3 rand_dir = myRand_vec3();
+                    rand_dir = glm::normalize(rand_dir);
+
                     glm::vec3 dir = rand_dir + sphere_normal;
                     dir = glm::normalize(dir);
                     Ray nr(p_offset, dir);
 
                     int b = maxBounces - 1;
-                    glm::vec3 spherecolor_255 = glm::vec3(nearest_sphere_obj_it->color.x * 255, nearest_sphere_obj_it->color.y * 255, nearest_sphere_obj_it->color.z * 255);
-                    return spherecolor_255 * ThrowRayRecursiveBounce(nr, scene, use_default_amb, b);
+                    return nearest_sphere_obj_it->color * ThrowRayRecursiveBounce(nr, scene, use_default_amb, b);
                 }
                 else if (e_material_type == Material::E_METALLIC)
                 {
                     if (use_default_amb)
                     {
-                        return glm::vec3(0.2 * 255, 0.2 * 255, 0.2 * 255);
+                        return glm::vec3(0.2, 0.2, 0.2);
                     }
-                    return scene.SceneAmbient_255;
+                    return scene.SceneAmbient;
                 }
-
             }
             else if (e_hit_type == RAY_HIT_TYPE::E_BOX_HIT)
             {
@@ -265,21 +262,22 @@ glm::vec3 ThrowRayRecursiveBounce(Ray& r, SceneStruct& scene, bool use_default_a
                     glm::vec3 box_normal =  nearest_box_obj_it->GetNormalOfIntersection(pi, MY_EPSILON);
                     //make offseted point
                     glm::vec3 p_offset = pi + MY_EPSILON * box_normal;
-                    glm::vec3 dir = myRand_vec3();
+                    glm::vec3 rand_dir = myRand_vec3();
+                    rand_dir = glm::normalize(rand_dir);
+
+                    glm::vec3 dir = rand_dir + box_normal;
+                    dir = glm::normalize(dir);
                     Ray nr(p_offset, dir);
                     int b = maxBounces - 1;
-                    // return nearest_box_obj_it->GetMaterialDiffuse() * CastRayRecursiveBounce(scene, nr, b, use_default_amb);
-                    //return nearest_box_obj_it->GetMaterialDiffuse();
-                    glm::vec3 boxcolor_255 = glm::vec3((nearest_box_obj_it->GetMaterialDiffuse()).x * 255, (nearest_box_obj_it->GetMaterialDiffuse()).y * 255, (nearest_box_obj_it->GetMaterialDiffuse()).z * 255);
-                    return boxcolor_255 * ThrowRayRecursiveBounce(nr, scene, use_default_amb, b);
+                    return nearest_box_obj_it->GetMaterialDiffuse() * ThrowRayRecursiveBounce(nr, scene, use_default_amb, b);
                 }
                 else if (e_material_type == Material::E_METALLIC)
                 {
                     if (use_default_amb)
                     {
-                        return glm::vec3(0.2 * 255, 0.2 * 255, 0.2 * 255);
+                        return glm::vec3(0.2, 0.2, 0.2);
                     }
-                    return scene.SceneAmbient_255;
+                    return scene.SceneAmbient;
                 }
             }
         }

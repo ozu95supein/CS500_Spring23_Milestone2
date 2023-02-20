@@ -14,7 +14,7 @@ int main(int argc, char ** argv)
     std::string screenshotName = "screenshot.png";
     bool        takeScreenshot = false;
     unsigned int maxBounces = 5;
-    unsigned int samplesPerPixel = 1;
+    unsigned int samplesPerPixel = 10;
 
     //receive commandline arguments 
     if (argc > 1)
@@ -68,7 +68,7 @@ int main(int argc, char ** argv)
     //boolean to render the image, this will only do this once per button press
     //this is to make sure we are not always doing the passes
     bool Need_To_RenderFullImage = true;
-
+    bool Debuging_One_Pixel = false;
     // Init the clock
     sf::Clock clock;
     while (window.isOpen())
@@ -102,28 +102,26 @@ int main(int argc, char ** argv)
         glm::vec3 result_color;
         if (Need_To_RenderFullImage)
         {
-            for (unsigned x = 0; x < WIDTH; x++)
+            if (Debuging_One_Pixel)
             {
-                NDC_x = ((x + 0.5f) - w_o_2) / w_o_2;
-                for (unsigned y = 0; y < HEIGHT; y++)
-                {
-                    NDC_y = (-((y + 0.5f) - h_o_2)) / h_o_2;
-                    //using NDC coord to create pixelWord coords
-                    PixelWorld = currentScene.mSceneCamera.position + (currentScene.mSceneCamera.focal_length * View) + (NDC_x * r_o_2) + (NDC_y * u_o_2a);
-                    glm::vec3 RayDir = PixelWorld - ray.P;  //get ray direction from origin and Pixelworld
-                    RayDir = glm::normalize(RayDir);
-                    ray.v = RayDir;   //update the ray direction according to PixelWorld Coords
+                unsigned int debugX = WIDTH / 2;
+                unsigned int debugY = HEIGHT / 2;
+                NDC_x = ((debugX + 0.5f) - w_o_2) / w_o_2;
+                
+                NDC_y = (-((debugY + 0.5f) - h_o_2)) / h_o_2;
+                //using NDC coord to create pixelWord coords
+                PixelWorld = currentScene.mSceneCamera.position + (currentScene.mSceneCamera.focal_length * View) + (NDC_x * r_o_2) + (NDC_y * u_o_2a);
+                glm::vec3 RayDir = PixelWorld - ray.P;  //get ray direction from origin and Pixelworld
+                RayDir = glm::normalize(RayDir);
+                ray.v = RayDir;   //update the ray direction according to PixelWorld Coords
 
-                    //original from milestone 1
-                    //result_color = ThrowRay(ray, currentScene, false);
+                // Milestone 2: Throw a Ray to the scene and get the resulting color if it reaches a light, or ambient
+                result_color = ThrowRayRecursiveBounce(ray, currentScene, false, maxBounces);
 
-                    // Milestone 2: Throw a Ray to the scene and get the resulting color if it reaches a light, or ambient
-                    result_color = ThrowRayRecursiveBounce(ray, currentScene, true, maxBounces);
-
-                    //convert to 255 format and set the pixel in the frame buffer
-                    glm::vec3 result_color_255(result_color.x * 255.0f, result_color.y * 255.0f, result_color.z * 255.0f);
-                    FrameBuffer::SetPixel(x, y, result_color_255.x, result_color_255.y, result_color_255.z);
-                }
+                //convert to 255 format and set the pixel in the frame buffer
+                glm::vec3 result_color_255(result_color.x * 255.0f, result_color.y * 255.0f, result_color.z * 255.0f);
+                FrameBuffer::SetPixel(debugX, debugY, result_color_255.x, result_color_255.y, result_color_255.z);
+                
                 ////////////////////// TAKE CONTENT IN FRAME BUFFER AND SHOW TO SCREEN ////////////////////////
                 // Show image on screen
                 FrameBuffer::ConvertFrameBufferToSFMLImage(image);
@@ -134,7 +132,42 @@ int main(int argc, char ** argv)
                 window.display();
                 //////////////////////////////////////////////
             }
+            else
+            {
+                for (unsigned s = 0; s < samplesPerPixel; s++)
+                {
+                    int cehck = s;
 
+                    for (unsigned x = 0; x < WIDTH; x++)
+                    {
+                        NDC_x = ((x + 0.5f) - w_o_2) / w_o_2;
+                        for (unsigned y = 0; y < HEIGHT; y++)
+                        {
+                            NDC_y = (-((y + 0.5f) - h_o_2)) / h_o_2;
+                            //using NDC coord to create pixelWord coords
+                            PixelWorld = currentScene.mSceneCamera.position + (currentScene.mSceneCamera.focal_length * View) + (NDC_x * r_o_2) + (NDC_y * u_o_2a);
+                            glm::vec3 RayDir = PixelWorld - ray.P;  //get ray direction from origin and Pixelworld
+                            RayDir = glm::normalize(RayDir);
+                            ray.v = RayDir;   //update the ray direction according to PixelWorld Coords
+
+                            // Milestone 2: Throw a Ray to the scene and get the resulting color if it reaches a light, or ambient
+                            result_color = ThrowRayRecursiveBounce(ray, currentScene, false, maxBounces);
+
+                            FrameBuffer::AddSample(x, y, result_color.x, result_color.y, result_color.z);
+
+                        }
+                        ////////////////////// TAKE CONTENT IN FRAME BUFFER AND SHOW TO SCREEN ////////////////////////
+                        // Show image on screen
+                        FrameBuffer::ConvertFrameBufferToSFMLImage(image);
+
+                        texture.update(image);
+                        sprite.setTexture(texture);
+                        window.draw(sprite);
+                        window.display();
+                        //////////////////////////////////////////////
+                    }
+                }
+            }
             Need_To_RenderFullImage = false;
         }
 
